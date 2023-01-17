@@ -14,14 +14,33 @@ Globals:
       AllowOrigin: "'*'"
   Function:
     Timeout: 900
+    Environment:
+      Variables:
+        FROM_EMAIL: poprahul@amazon.com
+        TO_EMAIL: rahul.popat@gmail.com
+
+Parameters:
+  DestinationBucketName:
+    Type: String
+  # FromEmail:
+  #   Type: String
+  # ToEmail:
+  #   Type: String
 
 Resources:
+  ## S3 bucket   
+  # DestinationBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref DestinationBucketName
+
+  ## Lambda function
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: hello-world/
       Handler: app.lambdaHandler
-      Runtime: nodejs12.x
+      Runtime: nodejs16.x
       Architectures:
         - x86_64
       Policies:
@@ -29,8 +48,11 @@ Resources:
             TableName: !Ref MyCDCTable
         - SESCrudPolicy:
             IdentityName: '*'
-        - S3FullAccessPolicy:
-            BucketName: 'poprahul-demos'
+        - S3CrudPolicy:
+            BucketName: !Ref DestinationBucketName
+      Environment:
+        Variables:
+          DESTINATION_BUCKETNAME: !Ref DestinationBucketName
 
       Events:
         HelloWorld:
@@ -71,3 +93,6 @@ Outputs:
   HelloWorldFunctionIamRole:
     Description: "Implicit IAM Role created for Hello World function"
     Value: !GetAtt HelloWorldFunctionRole.Arn
+  DestinationBucketName:
+    Value: !Ref DestinationBucketName
+    Description: S3 destination Bucket for object storage

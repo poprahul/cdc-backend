@@ -9,3 +9,5 @@ region = "us-east-1"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
+disable_rollback = true
+parameter_overrides = "DestinationBucketName=\"poprahul-demos\""

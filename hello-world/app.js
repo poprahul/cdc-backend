@@ -64,7 +64,7 @@ exports.lambdaHandler = async (event, context, callback) => {
         console.log('Error: ', err.message);
     }
 
-    let bucketName = 'poprahul-demos';
+    let bucketName = process.env.DESTINATION_BUCKETNAME;
     let bucketKey = firstName + "_" + lastName + ".pdf";
 
     try {
@@ -194,13 +194,6 @@ exports.lambdaHandler = async (event, context, callback) => {
             try {
                 console.log('file upload started')
                 const uploadResult = await s3.putObject(s3Params).promise();
-                // await s3.putObject(s3Params, function (err, data) {
-                //     if (err) {
-                //         console.log(err, err.stack);
-                //     } else {
-                //         console.log("file upload finished " + data);
-                //     }
-                // });
                 console.log("uploadResult="+ uploadResult);
             } catch (err) {
                 console.log(err)
@@ -214,11 +207,13 @@ exports.lambdaHandler = async (event, context, callback) => {
                     console.log("bucketName=" + bucketName);
                     console.log("bucketKey=" + bucketKey);
                     console.log("fileNameS3=" + fileNameS3);
+                    console.log("fromEmail=" + process.env.FROM_EMAIL);
+                    console.log("toEmail=" + process.env.TO_EMAIL);
                     var mailOptions = {
-                        from: 'poprahul@amazon.com',
+                        from: process.env.FROM_EMAIL,
                         subject: 'Demo: Covid Questionnaire for ' + fullName,
                         text: 'Please find attached the covid-19 questionaire for ' + fullName,
-                        to: 'rahul.popat@gmail.com',
+                        to: process.env.TO_EMAIL,
                         // bcc: Any BCC address you want here in an array,
                         attachments: [
                             {
@@ -258,34 +253,6 @@ exports.lambdaHandler = async (event, context, callback) => {
                 
                 console.log("getS3Response = " + getS3Response);
                 console.log("Email Sent");
-
-            // send email - raw without attachment (old)
-            /*
-            var sesParams = {
-                Destination: {
-                    ToAddresses: ["rahul.popat@gmail.com"]
-                },
-                Message: {
-                    Body: {
-                        Text: { Data: JSON.stringify(payload)
-                        }
-                    },
-                    Subject: { Data: "CDC Information Received for " + firstName + " " + lastName
-                    }
-                },
-                Source: "poprahul@amazon.com"
-            };
-                    
-            ses.sendEmail(sesParams, function (err, data) {
-                if (err) {
-                    console.log(err);
-                    context.fail(err);
-                } else {
-                    console.log(data);
-                    context.succeed(event);
-                }
-            });
-            */
 
             // save key info in database
             var idd = uuidv4()
